@@ -73,19 +73,27 @@ RSpec.describe "Practice with ActiveRecord", type: :model do
     end
 
     it "can find records via multiple equality comparrisons" do
-      #List the countries in Africa that have a population smaller than 30,000,000 and a life expectancy of more than 45?
+      #List the countries in Africa that have a population greater than 30,000,000 and a life expectancy of more than 45?
+      countries = Country
+        .where("population > ?", 30_000_000)
+        .where("lifeexpectancy > ?", 45)
+        .where(continent: "Africa")
       expect(countries.count).to eq(8)
    end
 
     it "can find records using wildcards" do
       #Which countries are something like a republic?
       #(are there 122 or 143 countries or ?)
+      countries = Country
+        .where("governmentform LIKE '%epublic%'")
       expect(countries.count).to eq(143)
-
     end
 
     it "can have multiple selects" do
       #Which countries are some kind of republic and achieved independence after 1945?
+      countries = Country
+        .where("governmentform LIKE '%epublic%'")
+        .where("indepyear > 1945")
       expect(countries.count).to eq(92)
     end
   end
@@ -103,17 +111,29 @@ RSpec.describe "Practice with ActiveRecord", type: :model do
 
     it "can use order" do
       # Which country has the highest life expectancy?
+      country = Country
+        .order(lifeexpectancy: :desc)
+        .limit(1)
+        .first
       expect(country.code).to eq('FLK')
     end
 
     it "can use order" do
       #Which is the smallest country by area
+      country = Country
+        .order(:surfacearea)
+        .limit(1)
+        .first
       expect(country.code).to eq('VAT')
 
     end
 
     it "can use order" do
       #which is the biggest country by area
+      country = Country
+        .order(surfacearea: :desc)
+        .limit(1)
+        .first
       expect(country.code).to eq('RUS')
 
 
@@ -121,11 +141,19 @@ RSpec.describe "Practice with ActiveRecord", type: :model do
 
     it "can use order" do
       #Which is the smallest country by population
+      country = Country
+        .order(:population)
+        .limit(1)
+        .first
       expect(country.code).to eq('ATA')
     end
 
     it "can use order" do
       #which is the biggest country by population
+      country = Country
+        .order(population: :desc)
+        .limit(1)
+        .first
       expect(country.code).to eq('CHN')
 
     end
@@ -135,9 +163,9 @@ RSpec.describe "Practice with ActiveRecord", type: :model do
       # Hint: use pluck
 
       countries = Country
-      .order(:lifeexpectancy)
-      .limit(10)
-      .pluck(:name)
+          .order(:lifeexpectancy)
+          .limit(10)
+          .pluck(:name)
 
       expected = ["Zambia", "Mozambique", "Malawi", "Zimbabwe", "Angola", "Botswana", "Rwanda", "Swaziland", "Niger", "Namibia"]
 
@@ -148,6 +176,11 @@ RSpec.describe "Practice with ActiveRecord", type: :model do
 
     it "can combine order and limit" do
       #Which five countries have the lowest population density?
+      country_names = Country
+        .order('population / surfacearea')
+        # .order(:population)
+        .limit(5)
+        .pluck
       expected = ["South Georgia and the South Sandwich Islands", "Bouvet Island", "Antarctica", "British Indian Ocean Territory", "Heard Island and McDonald Islands"]
 
       expected.map do |country|
